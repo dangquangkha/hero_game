@@ -1,6 +1,7 @@
 -- your-game/src/entities/bosses/Boss.lua
 
-local class = require 'libs.middleclass'
+local class = require 'libs.middleclass.middleclass' -- Đảm bảo bạn đã cài đặt thư viện middleclass
+-- Import lớp cha Actor nếu có (nếu không thì Boss sẽ là lớp cơ sở)
 -- Import component quản lý phase
 local BossPhaseManager = require 'src.entities.bosses.BossPhaseManager'
 

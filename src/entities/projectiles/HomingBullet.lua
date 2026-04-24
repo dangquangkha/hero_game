@@ -6,7 +6,7 @@
 -- Ứng dụng: Tạo các loại đạn ma mị, tên lửa tầm nhiệt.
 -- =============================================================================
 
-local class = require 'libs.middleclass'
+local class = require 'libs.middleclass.middleclass' -- Đảm bảo bạn đã cài đặt thư viện middleclass
 
 -- Import lớp Bullet (Vì HomingBullet cần các thuộc tính hình dáng, màu sắc của Bullet)
 local Bullet = require 'src.entities.projectiles.Bullet'

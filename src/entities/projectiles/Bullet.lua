@@ -6,7 +6,7 @@
 -- và hiệu ứng nhấp nháy cảnh báo (telegraph).
 -- =============================================================================
 
-local class = require 'libs.middleclass'
+local class = require 'libs.middleclass.middleclass' -- Đảm bảo bạn đã cài đặt thư viện middleclass
 
 -- Import (nạp) lớp cha Projectile vào để sử dụng
 local Projectile = require 'src.entities.base.Projectile'

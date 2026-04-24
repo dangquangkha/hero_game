@@ -1,6 +1,6 @@
 -- your-game/src/systems/combat/CombatManager.lua
 
-local class = require 'libs.middleclass'
+local class = require 'libs.middleclass.middleclass' -- Đảm bảo bạn đã cài đặt thư viện middleclass
 
 -- Import các hệ thống và Entity liên quan
 local BulletManager = require 'src.systems.combat.BulletManager'

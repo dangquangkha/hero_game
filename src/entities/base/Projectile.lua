@@ -6,7 +6,7 @@
 -- Lưu ý: Đây là lớp cha, thường không được tạo trực tiếp mà thông qua các lớp con.
 -- =============================================================================
 
-local class = require 'libs.middleclass'
+local class = require 'libs.middleclass.middleclass' -- Đảm bảo bạn đã cài đặt thư viện middleclass
 
 -- Khởi tạo class Projectile bằng thư viện middleclass
 local Projectile = class('Projectile')

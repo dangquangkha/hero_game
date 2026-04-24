@@ -5,7 +5,7 @@
 -- Chức năng chính: Xử lý va chạm giữa đạn và Player.
 -- =============================================================================
 
-local class = require 'libs.middleclass'
+local class = require 'libs.middleclass.middleclass' -- Đảm bảo bạn đã cài đặt thư viện middleclass
 local BulletManager = class('BulletManager')
 
 function BulletManager:initialize()

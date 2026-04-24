@@ -1,6 +1,6 @@
 -- your-game/src/entities/bosses/types/DemonKing.lua
 
-local class = require 'libs.middleclass'
+local class = require 'libs.middleclass.middleclass' -- Đảm bảo bạn đã cài đặt thư viện middleclass
 -- Import lớp cha
 local Boss = require 'src.entities.bosses.Boss'
 local BulletPatterns = require 'src.entities.projectiles.BulletPatterns'

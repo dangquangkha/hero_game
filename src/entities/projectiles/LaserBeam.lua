@@ -5,7 +5,7 @@
 -- Đặc điểm: Không bay đi mà bám theo nguồn phát, có trạng thái nhắm và bắn.
 -- =============================================================================
 
-local class = require 'libs.middleclass'
+local class = require 'libs.middleclass.middleclass' -- Đảm bảo bạn đã cài đặt thư viện middleclass
 local Projectile = require 'src.entities.base.Projectile'
 
 -- Khởi tạo class LaserBeam kế thừa từ lớp cha Projectile

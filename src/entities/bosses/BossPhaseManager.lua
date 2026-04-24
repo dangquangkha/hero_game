@@ -1,6 +1,6 @@
 -- your-game/src/entities/bosses/BossPhaseManager.lua
 
-local class = require 'libs.middleclass'
+local class = require 'libs.middleclass.middleclass' -- Đảm bảo bạn đã cài đặt thư viện middleclass
 
 local BossPhaseManager = class('BossPhaseManager')
 

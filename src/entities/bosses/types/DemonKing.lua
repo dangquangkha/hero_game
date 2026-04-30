@@ -107,11 +107,14 @@ end
 
 function DemonKing:executePhase3Attacks(bManager, player)
     -- Ở Phase 3 (Absolute Despair), tốc độ đánh là 0.8s, tạo ra ma trận đạn thật sự
+    print(string.format("[DemonKing] Phase 3 Attack! AtkIdx=%d HP=%d", self.currentAttackIndex, self.hp))
+    
     BulletPatterns.circleBurst(bManager, self.x, self.y, 36, 300, {radius = 3, color = {1, 0, 0}})
     BulletPatterns.cone(bManager, self.x, self.y, player.x, player.y, 5, math.pi/2, 400, {radius = 5, color = {0, 0, 0}})
     
     -- Cứ mỗi 3 nhịp đạn bay sẽ có một vệt Laser khổng lồ nhắm thẳng vào player
     if self.currentAttackIndex % 3 == 0 then
+        print("[DemonKing] PHASE 3 SPECIAL: Death Lock Ray!")
         -- Death Lock Ray
         BulletPatterns.spawnLaser(bManager, self, 0, 0, math.atan2(player.y - self.y, player.x - self.x), {width = 100, telegraph = 1.5, duration = 0.5, color = {1, 0, 0}})
     end

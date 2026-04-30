@@ -12,11 +12,19 @@ function BulletManager:initialize()
     -- Bảng (Array) chứa tất cả các vật thể bay hiện có trên sân đấu
     -- Bao gồm cả Bullet, HomingBullet và LaserBeam.
     self.projectiles = {} 
+    
+    -- [DEBUG] Tracking stats
+    self._maxSeenCount = 0
+    self._safetyCap = 2000 -- Giới hạn tối đa để tránh treo game
 end
 
 --- Thêm đạn vào danh sách quản lý
 -- Hàm này thường được gọi từ các Pattern (BulletPatterns)
 function BulletManager:add(projectile)
+    if #self.projectiles >= self._safetyCap then
+        print("[BulletManager] WARNING: Safety cap reached! Skipping projectile.")
+        return 
+    end
     table.insert(self.projectiles, projectile)
 end
 
@@ -24,6 +32,14 @@ end
 -- @param dt: Delta time
 -- @param player: Đối tượng người chơi để kiểm tra va chạm
 function BulletManager:update(dt, player)
+    local startTime = love.timer.getTime()
+    local count = #self.projectiles
+    
+    if count > self._maxSeenCount then
+        self._maxSeenCount = count
+        print(string.format("[BulletManager] New record: %d projectiles", count))
+    end
+
     -- [MẸO LẬP TRÌNH]: Duyệt mảng NGƯỢC (từ cuối lên đầu)
     -- Khi xóa một phần tử ở giữa mảng trong Lua, các phần tử phía sau sẽ bị dồn lên.
     -- Nếu duyệt xuôi (1 -> n), ta sẽ bị nhảy cóc phần tử, gây sót đạn hoặc lỗi index.
@@ -44,6 +60,11 @@ function BulletManager:update(dt, player)
         if p.isDead then
             table.remove(self.projectiles, i)
         end
+    end
+
+    local duration = love.timer.getTime() - startTime
+    if duration > 0.016 then -- Log if update takes more than 1 frame (at 60fps)
+        print(string.format("[BulletManager] SLOW UPDATE: %.3fms for %d projectiles", duration * 1000, #self.projectiles))
     end
 end
 
@@ -114,5 +135,46 @@ end
 function BulletManager:getCount()
     return #self.projectiles
 end
+
+-- ============================================================
+--  PATCH CHO BulletManager.lua
+--  Thêm 2 method mới vào cuối file, TRƯỚC dòng return BulletManager
+--  Giữ nguyên toàn bộ code cũ — KHÔNG xóa gì.
+-- ============================================================
+
+-- Thêm method này vào BulletManager (trước return BulletManager):
+
+--- [MỚI] Cập nhật đạn mà KHÔNG check collision
+-- Dùng khi CombatManager muốn tự xử lý collision qua CollisionSystem.
+-- Method update() cũ vẫn giữ nguyên để tương thích ngược.
+function BulletManager:updateOnly(dt)
+    for i = #self.projectiles, 1, -1 do
+        local p = self.projectiles[i]
+        p:update(dt)
+        -- KHÔNG check collision ở đây — CollisionSystem làm việc đó
+    end
+    -- Không cleanup ở đây — gọi cleanup() riêng sau collision xong
+end
+
+--- [MỚI] Trả về danh sách đạn hiện tại (để CollisionSystem đọc)
+function BulletManager:getProjectiles()
+    return self.projectiles
+end
+
+--- [MỚI] Dọn đạn đã chết — gọi sau khi collision + damage đã xử lý xong
+function BulletManager:cleanup()
+    for i = #self.projectiles, 1, -1 do
+        if self.projectiles[i].isDead then
+            table.remove(self.projectiles, i)
+        end
+    end
+end
+
+-- ============================================================
+--  LƯU Ý:
+--  Method update(dt, player) cũ VẪN GIỮ NGUYÊN trong file.
+--  Nó vẫn chạy được nếu bạn gọi trực tiếp (tương thích ngược).
+--  CombatManager mới sẽ dùng updateOnly() + cleanup() thay thế.
+-- ============================================================
 
 return BulletManager

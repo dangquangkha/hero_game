@@ -1,358 +1,330 @@
+# Hướng dẫn dự án hero_game
+
+Dưới đây là cấu trúc thư mục tự động cập nhật:
+
+<!-- START_TREE -->
+```text
 your-game/
-├── main.lua                          # Entry point
-├── conf.lua                          # LÖVE configuration
-├── README.md                         # Hướng dẫn dự án
-│
-├── src/
-│   │
-│   ├── core/                         # ═══ HỆ THỐNG NỀN TẢNG ═══
-│   │   ├── gamestate.lua             # Scene manager (menu/battle/cutscene/shop)
-│   │   ├── input.lua                 # Input handler (keyboard/gamepad)
-│   │   ├── camera.lua                # Camera với shake/zoom/follow
-│   │   ├── event.lua                 # Event system (pub/sub pattern)
-│   │   ├── save.lua                  # Save/Load system
-│   │   └── config.lua                # Game settings (volume, resolution, keybinds)
-│   │
-│   ├── entities/                     # ═══ GAME OBJECTS ═══
-│   │   ├── base/
-│   │   │   ├── Entity.lua            # Base class cho mọi object
-│   │   │   ├── Actor.lua             # Entities có HP/stats (Player, Enemies, Bosses)
-│   │   │   └── Projectile.lua        # Base cho bullets/projectiles
-│   │   │
-│   │   ├── player/
-│   │   │   ├── Player.lua            # Player character
-│   │   │   ├── PlayerStates.lua      # State machine (idle/move/dash/hurt)
-│   │   │   └── PlayerAbilities.lua   # Kỹ năng/special moves
-│   │   │
-│   │   ├── enemies/
-│   │   │   ├── Enemy.lua             # Base enemy class
-│   │   │   ├── EnemyTypes.lua        # Registry các loại enemy
-│   │   │   │
-│   │   │   └── types/                # Từng loại enemy cụ thể
-│   │   │       ├── GoblinWarrior.lua
-│   │   │       ├── MageTower.lua
-│   │   │       └── FlyingEye.lua
-│   │   │
-│   │   ├── bosses/
-│   │   │   ├── Boss.lua              # Base boss class
-│   │   │   ├── BossPhaseManager.lua  # Quản lý phases (phase 1, 2, 3...)
-│   │   │   │
-│   │   │   └── types/                # Boss cụ thể
-│   │   │       ├── DemonKing.lua
-│   │   │       ├── DragonLord.lua
-│   │   │       └── NecromancerQueen.lua
-│   │   │
-│   │   ├── projectiles/
-│   │   │   ├── Bullet.lua            # Đạn cơ bản
-│   │   │   ├── HomingBullet.lua      # Đạn tự tìm mục tiêu
-│   │   │   ├── LaserBeam.lua         # Laser
-│   │   │   └── BulletPatterns.lua    # Danmaku patterns (spiral, circle, wave)
-│   │   │
-│   │   └── npcs/
-│   │       ├── NPC.lua               # Base NPC class
-│   │       └── types/
-│   │           ├── Merchant.lua
-│   │           ├── QuestGiver.lua
-│   │           └── Companion.lua
-│   │
-│   ├── systems/                      # ═══ GAME SYSTEMS ═══
-│   │   │
-│   │   ├── combat/
-│   │   │   ├── CombatManager.lua     # Quản lý battle flow
-│   │   │   ├── DamageCalculator.lua  # Tính damage, crit, elemental
-│   │   │   ├── BulletManager.lua     # Pool bullets, collision
-│   │   │   ├── SkillSystem.lua       # Hệ thống kỹ năng
-│   │   │   ├── ComboTracker.lua      # Theo dõi combo chains
-│   │   │   └── StatusEffects.lua     # Poison, burn, freeze, stun
-│   │   │
-│   │   ├── inventory/
-│   │   │   ├── Inventory.lua         # Player inventory
-│   │   │   ├── Item.lua              # Base item class
-│   │   │   ├── ItemDatabase.lua      # Registry mọi items
-│   │   │   │
-│   │   │   └── items/                # Các loại item
-│   │   │       ├── weapons/
-│   │   │       │   ├── Sword.lua
-│   │   │       │   ├── Bow.lua
-│   │   │       │   └── Staff.lua
-│   │   │       ├── consumables/
-│   │   │       │   ├── Potion.lua
-│   │   │       │   └── Scroll.lua
-│   │   │       └── equipment/
-│   │   │           ├── Armor.lua
-│   │   │           └── Accessory.lua
-│   │   │
-│   │   ├── dialogue/
-│   │   │   ├── DialogueManager.lua   # Quản lý conversations
-│   │   │   ├── DialogueBox.lua       # UI hiển thị text
-│   │   │   ├── DialogueParser.lua    # Parse script files
-│   │   │   ├── ChoiceMenu.lua        # Branching choices
-│   │   │   └── CharacterPortrait.lua # Character sprites
-│   │   │
-│   │   ├── story/
-│   │   │   ├── StoryManager.lua      # Quản lý plot progression
-│   │   │   ├── ScenarioLoader.lua    # Load scenario data
-│   │   │   ├── FlagSystem.lua        # Story flags (bossDead, questComplete)
-│   │   │   └── BranchingTree.lua     # Multiple story routes
-│   │   │
-│   │   ├── cutscene/
-│   │   │   ├── CutscenePlayer.lua    # Chạy cutscenes
-│   │   │   ├── Timeline.lua          # Timeline editor data
-│   │   │   ├── CameraDirector.lua    # Camera movement in cutscenes
-│   │   │   └── SkipController.lua    # Skip/pause cutscenes
-│   │   │
-│   │   ├── map/
-│   │   │   ├── MapManager.lua        # Load/unload maps
-│   │   │   ├── TileMap.lua           # Tile-based map rendering
-│   │   │   ├── CollisionMap.lua      # Collision layer
-│   │   │   ├── TriggerZone.lua       # Event triggers (enter area → cutscene)
-│   │   │   └── Minimap.lua           # Minimap UI
-│   │   │
-│   │   ├── puzzle/
-│   │   │   ├── PuzzleManager.lua     # Puzzle logic
-│   │   │   └── types/
-│   │   │       ├── SlidingBlock.lua
-│   │   │       ├── PatternMatch.lua
-│   │   │       └── RiddleSolver.lua
-│   │   │
-│   │   ├── roguelike/
-│   │   │   ├── RunManager.lua        # Quản lý 1 run (reset khi chết)
-│   │   │   ├── RoomGenerator.lua     # Procedural room gen
-│   │   │   ├── LootTable.lua         # Random loot
-│   │   │   ├── MetaProgression.lua   # Unlock permanent upgrades
-│   │   │   └── DifficultyScaling.lua # Tăng độ khó theo floor
-│   │   │
-│   │   ├── upgrade/
-│   │   │   ├── UpgradeTree.lua       # Skill tree
-│   │   │   ├── StatUpgrade.lua       # HP, ATK, SPD upgrades
-│   │   │   └── AbilityUnlock.lua     # Unlock new abilities
-│   │   │
-│   │   ├── shop/
-│   │   │   ├── ShopManager.lua       # Mua/bán items
-│   │   │   ├── ShopInventory.lua     # Shop stock
-│   │   │   └── Currency.lua          # Gold, gems, tokens
-│   │   │
-│   │   └── achievement/
-│   │       ├── AchievementManager.lua
-│   │       └── AchievementData.lua
-│   │
-│   ├── screens/                      # ═══ GAME SCREENS ═══
-│   │   ├── SplashScreen.lua          # Logo startup
-│   │   ├── MainMenu.lua              # Main menu
-│   │   ├── CharacterSelect.lua       # Chọn character
-│   │   ├── BattleScreen.lua          # Màn chiến đấu chính
-│   │   ├── MapScreen.lua             # Overworld map
-│   │   ├── ShopScreen.lua            # Shop UI
-│   │   ├── InventoryScreen.lua       # Inventory UI
-│   │   ├── UpgradeScreen.lua         # Skill tree UI
-│   │   ├── PauseMenu.lua             # Pause menu
-│   │   ├── GameOverScreen.lua        # Game over
-│   │   ├── VictoryScreen.lua         # Win screen
-│   │   └── SettingsScreen.lua        # Settings menu
-│   │
-│   ├── ui/                           # ═══ UI COMPONENTS ═══
-│   │   ├── components/
-│   │   │   ├── Button.lua            # Reusable button
-│   │   │   ├── Panel.lua             # UI panel/window
-│   │   │   ├── Slider.lua            # Volume slider
-│   │   │   ├── Checkbox.lua          # Toggle options
-│   │   │   ├── ProgressBar.lua       # HP/XP bars
-│   │   │   ├── Tooltip.lua           # Item tooltips
-│   │   │   ├── Modal.lua             # Popup windows
-│   │   │   └── Notification.lua      # Toast notifications
-│   │   │
-│   │   ├── hud/
-│   │   │   ├── BattleHUD.lua         # HP, abilities, combo
-│   │   │   ├── MinimapHUD.lua        # Minimap corner
-│   │   │   └── QuestTracker.lua      # Quest objectives
-│   │   │
-│   │   └── animations/
-│   │       ├── UITransition.lua      # Fade in/out
-│   │       └── NumberPopup.lua       # Damage numbers
-│   │
-│   ├── effects/                      # ═══ VFX & JUICE ═══
-│   │   ├── ParticleManager.lua       # Particle pooling
-│   │   ├── ScreenShake.lua           # Camera shake effects
-│   │   ├── FlashEffect.lua           # Screen flash (hit/heal)
-│   │   ├── TrailRenderer.lua         # Motion trails
-│   │   └── ExplosionEffect.lua       # Explosions
-│   │
-│   ├── audio/                        # ═══ AUDIO SYSTEM ═══
-│   │   ├── AudioManager.lua          # Quản lý âm thanh
-│   │   ├── MusicPlayer.lua           # Background music
-│   │   ├── SFXPlayer.lua             # Sound effects
-│   │   └── AudioMixer.lua            # Volume control
-│   │
-│   └── utils/                        # ═══ UTILITIES ═══
-│       ├── math/
-│       │   ├── Vector2.lua           # Vector math
-│       │   ├── Collision.lua         # AABB, circle collision
-│       │   └── Easing.lua            # Easing functions
-│       │
-│       ├── animation/
-│       │   ├── Animator.lua          # Sprite animation
-│       │   ├── Tween.lua             # Tweening library wrapper
-│       │   └── StateMachine.lua      # Generic state machine
-│       │
-│       ├── helpers/
-│       │   ├── Table.lua             # Table utilities
-│       │   ├── String.lua            # String helpers
-│       │   ├── Color.lua             # Color utilities
-│       │   ├── Timer.lua             # Timer/cooldown
-│       │   └── Pool.lua              # Object pooling
-│       │
-│       └── debug/
-│           ├── DebugDraw.lua         # Draw hitboxes
-│           ├── Console.lua           # In-game console
-│           └── Profiler.lua          # Performance monitor
-│
-├── assets/                           # ═══ GAME ASSETS ═══
-│   │
-│   ├── images/
-│   │   ├── characters/
-│   │   │   ├── player/
-│   │   │   │   ├── idle.png
-│   │   │   │   ├── run.png
-│   │   │   │   └── attack.png
-│   │   │   ├── enemies/
-│   │   │   │   └── (enemy sprites)
-│   │   │   ├── bosses/
-│   │   │   │   └── (boss sprites)
-│   │   │   └── npcs/
-│   │   │       └── (npc portraits)
-│   │   │
-│   │   ├── items/
-│   │   │   ├── weapons/
-│   │   │   ├── consumables/
-│   │   │   └── equipment/
-│   │   │
-│   │   ├── ui/
-│   │   │   ├── buttons/
-│   │   │   ├── panels/
-│   │   │   ├── icons/
-│   │   │   └── fonts/
-│   │   │
-│   │   ├── effects/
-│   │   │   ├── particles/
-│   │   │   ├── explosions/
-│   │   │   └── projectiles/
-│   │   │
-│   │   ├── backgrounds/
-│   │   │   ├── battle/
-│   │   │   ├── menu/
-│   │   │   └── cutscenes/
-│   │   │
-│   │   └── tilesets/
-│   │       └── (map tiles)
-│   │
+├── assets/
 │   ├── audio/
 │   │   ├── music/
-│   │   │   ├── menu_theme.ogg
 │   │   │   ├── battle_01.ogg
 │   │   │   ├── boss_theme.ogg
+│   │   │   ├── menu_theme.ogg
 │   │   │   └── victory.ogg
-│   │   │
 │   │   └── sfx/
+│   │       ├── combat/
+│   │       │   ├── explosion.wav
+│   │       │   └── hit.wav
 │   │       ├── player/
 │   │       │   ├── attack.wav
 │   │       │   ├── hurt.wav
 │   │       │   └── jump.wav
-│   │       ├── ui/
-│   │       │   ├── click.wav
-│   │       │   └── hover.wav
-│   │       └── combat/
-│   │           ├── explosion.wav
-│   │           └── hit.wav
-│   │
+│   │       └── ui/
+│   │           ├── click.wav
+│   │           └── hover.wav
+│   ├── data/
+│   │   ├── achievements/
+│   │   │   └── achievements.json
+│   │   ├── bullet_patterns/
+│   │   │   ├── circle_burst.json
+│   │   │   ├── custom_patterns.json
+│   │   │   └── spiral.json
+│   │   ├── cutscenes/
+│   │   │   ├── boss_defeat.json
+│   │   │   └── intro_cutscene.json
+│   │   ├── dialogues/
+│   │   │   ├── cutscenes/
+│   │   │   │   ├── finale.json
+│   │   │   │   └── intro.json
+│   │   │   ├── boss_dialogues.json
+│   │   │   └── npc_merchant.json
+│   │   ├── enemies/
+│   │   │   ├── bosses.json
+│   │   │   └── common_enemies.json
+│   │   ├── items/
+│   │   │   ├── consumables.json
+│   │   │   ├── equipment.json
+│   │   │   └── weapons.json
+│   │   ├── localization/
+│   │   │   ├── en.json
+│   │   │   └── vi.json
+│   │   ├── maps/
+│   │   │   ├── boss_arenas/
+│   │   │   │   └── demon_king_arena.json
+│   │   │   ├── dungeon_01.json
+│   │   │   └── overworld.json
+│   │   ├── scenarios/
+│   │   │   ├── endings/
+│   │   │   │   ├── bad_ending.json
+│   │   │   │   └── true_ending.json
+│   │   │   ├── chapter_01.json
+│   │   │   └── prologue.json
+│   │   └── skills/
+│   │       ├── boss_skills.json
+│   │       └── player_skills.json
 │   ├── fonts/
-│   │   ├── main.ttf                  # UI font
-│   │   ├── dialogue.ttf              # Dialogue font
-│   │   └── damage_numbers.ttf        # Số damage
-│   │
-│   ├── shaders/                      # Shader effects (optional)
-│   │   ├── outline.glsl
-│   │   ├── blur.glsl
-│   │   └── chromatic.glsl
-│   │
-│   └── data/                         # ═══ GAME DATA ═══
-│       │
-│       ├── scenarios/                # Story scenarios
-│       │   ├── prologue.json
-│       │   ├── chapter_01.json
-│       │   └── endings/
-│       │       ├── true_ending.json
-│       │       └── bad_ending.json
-│       │
-│       ├── dialogues/                # Dialogue scripts
-│       │   ├── npc_merchant.json
-│       │   ├── boss_dialogues.json
-│       │   └── cutscenes/
-│       │       ├── intro.json
-│       │       └── finale.json
-│       │
-│       ├── items/                    # Item definitions
-│       │   ├── weapons.json
-│       │   ├── consumables.json
-│       │   └── equipment.json
-│       │
-│       ├── enemies/                  # Enemy data
-│       │   ├── common_enemies.json
-│       │   └── bosses.json
-│       │
-│       ├── skills/                   # Skill definitions
-│       │   ├── player_skills.json
-│       │   └── boss_skills.json
-│       │
-│       ├── maps/                     # Map data
-│       │   ├── overworld.json
-│       │   ├── dungeon_01.json
-│       │   └── boss_arenas/
-│       │       └── demon_king_arena.json
-│       │
-│       ├── bullet_patterns/          # Danmaku patterns
-│       │   ├── spiral.json
-│       │   ├── circle_burst.json
-│       │   └── custom_patterns.json
-│       │
-│       ├── cutscenes/                # Cutscene timelines
-│       │   ├── intro_cutscene.json
-│       │   └── boss_defeat.json
-│       │
-│       ├── achievements/
-│       │   └── achievements.json
-│       │
-│       └── localization/             # Đa ngôn ngữ (future)
-│           ├── en.json
-│           └── vi.json
-│
-├── libs/                             # ═══ EXTERNAL LIBRARIES ═══
-│   ├── middleclass.lua               # OOP (https://github.com/kikito/middleclass)
-│   ├── hump/                         # Helpers (gamestate, timer, camera)
+│   │   ├── damage_numbers.ttf
+│   │   ├── dialogue.ttf
+│   │   └── main.ttf
+│   ├── images/
+│   │   ├── backgrounds/
+│   │   │   ├── battle/
+│   │   │   ├── cutscenes/
+│   │   │   └── menu/
+│   │   ├── characters/
+│   │   │   ├── bosses/
+│   │   │   ├── enemies/
+│   │   │   ├── npcs/
+│   │   │   └── player/
+│   │   │       ├── attack.png
+│   │   │       ├── idle.png
+│   │   │       └── run.png
+│   │   ├── effects/
+│   │   │   ├── explosions/
+│   │   │   ├── particles/
+│   │   │   └── projectiles/
+│   │   ├── items/
+│   │   │   ├── consumables/
+│   │   │   ├── equipment/
+│   │   │   └── weapons/
+│   │   ├── tilesets/
+│   │   └── ui/
+│   │       ├── buttons/
+│   │       ├── fonts/
+│   │       ├── icons/
+│   │       └── panels/
+│   └── shaders/
+│       ├── blur.glsl
+│       ├── chromatic.glsl
+│       └── outline.glsl
+├── docs/
+│   ├── ai_prompts/
+│   │   ├── boss_pattern_template.txt
+│   │   └── entity_template.txt
+│   ├── architecture.md
+│   ├── coding_standards.md
+│   ├── data_formats.md
+│   └── entity_reference.md
+├── libs/
+│   ├── hump/
+│   │   ├── camera.lua
 │   │   ├── gamestate.lua
-│   │   ├── timer.lua
-│   │   └── camera.lua
-│   ├── anim8.lua                     # Sprite animation
-│   ├── bump.lua                      # Collision detection
-│   ├── STI.lua                       # Tiled map loader
-│   ├── flux.lua                      # Tweening
-│   ├── lume.lua                      # General utilities
-│   ├── json.lua                      # JSON parser
-│   └── inspect.lua                   # Debug printing
-│
-├── tools/                            # ═══ DEV TOOLS ═══
-│   ├── map_editor/                   # Custom map tools (optional)
-│   ├── dialogue_editor/              # Dialogue creator (optional)
-│   └── build_scripts/
-│       ├── build_win.bat
-│       ├── build_mac.sh
-│       └── build_linux.sh
-│
-└── docs/                             # ═══ DOCUMENTATION ═══
-    ├── architecture.md               # Giải thích cấu trúc
-    ├── coding_standards.md           # Code conventions
-    ├── entity_reference.md           # Tài liệu entities
-    ├── data_formats.md               # JSON schema
-    └── ai_prompts/                   # Lưu prompts hiệu quả
-        ├── entity_template.txt
-        └── boss_pattern_template.txt#   h e r o _ g a m e  
- 
+│   │   └── timer.lua
+│   ├── middleclass/
+│   │   ├── performance/
+│   │   │   ├── run.lua
+│   │   │   └── time.lua
+│   │   ├── rockspecs/
+│   │   │   ├── middleclass-3.0-0.rockspec
+│   │   │   ├── middleclass-3.1-0.rockspec
+│   │   │   ├── middleclass-3.2-0.rockspec
+│   │   │   ├── middleclass-4.0-0.rockspec
+│   │   │   ├── middleclass-4.1-0.rockspec
+│   │   │   └── middleclass-4.1.1-0.rockspec
+│   │   ├── spec/
+│   │   │   ├── class_spec.lua
+│   │   │   ├── classes_spec.lua
+│   │   │   ├── default_methods_spec.lua
+│   │   │   ├── instances_spec.lua
+│   │   │   ├── metamethods_lua_5_2.lua
+│   │   │   ├── metamethods_lua_5_3.lua
+│   │   │   ├── metamethods_spec.lua
+│   │   │   └── mixins_spec.lua
+│   │   ├── CHANGELOG.md
+│   │   ├── middleclass.lua
+│   │   ├── MIT-LICENSE.txt
+│   │   ├── README.md
+│   │   └── UPDATING.md
+│   ├── anim8.lua
+│   ├── bump.lua
+│   ├── flux.lua
+│   ├── inspect.lua
+│   ├── json.lua
+│   ├── lume.lua
+│   └── STI.lua
+├── src/
+│   ├── audio/
+│   │   ├── AudioManager.lua
+│   │   ├── AudioMixer.lua
+│   │   ├── MusicPlayer.lua
+│   │   └── SFXPlayer.lua
+│   ├── core/
+│   │   ├── camera.lua
+│   │   ├── config.lua
+│   │   ├── event.lua
+│   │   ├── gamestate.lua
+│   │   ├── input.lua
+│   │   └── save.lua
+│   ├── effects/
+│   │   ├── ExplosionEffect.lua
+│   │   ├── FlashEffect.lua
+│   │   ├── ParticleManager.lua
+│   │   ├── ScreenShake.lua
+│   │   └── TrailRenderer.lua
+│   ├── entities/
+│   │   ├── base/
+│   │   │   ├── Actor.lua
+│   │   │   ├── Entity.lua
+│   │   │   └── Projectile.lua
+│   │   ├── bosses/
+│   │   │   ├── types/
+│   │   │   │   ├── DemonKing.lua
+│   │   │   │   ├── DragonLord.lua
+│   │   │   │   └── NecromancerQueen.lua
+│   │   │   ├── Boss.lua
+│   │   │   └── BossPhaseManager.lua
+│   │   ├── enemies/
+│   │   │   ├── types/
+│   │   │   │   ├── FlyingEye.lua
+│   │   │   │   ├── GoblinWarrior.lua
+│   │   │   │   └── MageTower.lua
+│   │   │   ├── Enemy.lua
+│   │   │   └── EnemyTypes.lua
+│   │   ├── npcs/
+│   │   │   ├── types/
+│   │   │   │   ├── Companion.lua
+│   │   │   │   ├── Merchant.lua
+│   │   │   │   └── QuestGiver.lua
+│   │   │   └── NPC.lua
+│   │   ├── player/
+│   │   │   ├── Player.lua
+│   │   │   ├── PlayerAbilities.lua
+│   │   │   └── PlayerStates.lua
+│   │   └── projectiles/
+│   │       ├── Bullet.lua
+│   │       ├── BulletPatterns.lua
+│   │       ├── HomingBullet.lua
+│   │       └── LaserBeam.lua
+│   ├── screens/
+│   │   ├── BattleScreen.lua
+│   │   ├── CharacterSelect.lua
+│   │   ├── GameOverScreen.lua
+│   │   ├── InventoryScreen.lua
+│   │   ├── MainMenu.lua
+│   │   ├── MapScreen.lua
+│   │   ├── PauseMenu.lua
+│   │   ├── SettingsScreen.lua
+│   │   ├── ShopScreen.lua
+│   │   ├── SplashScreen.lua
+│   │   ├── UpgradeScreen.lua
+│   │   └── VictoryScreen.lua
+│   ├── systems/
+│   │   ├── achievement/
+│   │   │   ├── AchievementData.lua
+│   │   │   └── AchievementManager.lua
+│   │   ├── combat/
+│   │   │   ├── BulletManager.lua
+│   │   │   ├── CombatManager.lua
+│   │   │   ├── ComboTracker.lua
+│   │   │   ├── DamageCalculator.lua
+│   │   │   ├── SkillSystem.lua
+│   │   │   └── StatusEffects.lua
+│   │   ├── cutscene/
+│   │   │   ├── CameraDirector.lua
+│   │   │   ├── CutscenePlayer.lua
+│   │   │   ├── SkipController.lua
+│   │   │   └── Timeline.lua
+│   │   ├── dialogue/
+│   │   │   ├── CharacterPortrait.lua
+│   │   │   ├── ChoiceMenu.lua
+│   │   │   ├── DialogueBox.lua
+│   │   │   ├── DialogueManager.lua
+│   │   │   └── DialogueParser.lua
+│   │   ├── inventory/
+│   │   │   ├── items/
+│   │   │   │   ├── consumables/
+│   │   │   │   │   ├── Potion.lua
+│   │   │   │   │   └── Scroll.lua
+│   │   │   │   ├── equipment/
+│   │   │   │   │   ├── Accessory.lua
+│   │   │   │   │   └── Armor.lua
+│   │   │   │   └── weapons/
+│   │   │   │       ├── Bow.lua
+│   │   │   │       ├── Staff.lua
+│   │   │   │       └── Sword.lua
+│   │   │   ├── Inventory.lua
+│   │   │   ├── Item.lua
+│   │   │   └── ItemDatabase.lua
+│   │   ├── map/
+│   │   │   ├── CollisionMap.lua
+│   │   │   ├── MapManager.lua
+│   │   │   ├── Minimap.lua
+│   │   │   ├── TileMap.lua
+│   │   │   └── TriggerZone.lua
+│   │   ├── puzzle/
+│   │   │   ├── types/
+│   │   │   │   ├── PatternMatch.lua
+│   │   │   │   ├── RiddleSolver.lua
+│   │   │   │   └── SlidingBlock.lua
+│   │   │   └── PuzzleManager.lua
+│   │   ├── roguelike/
+│   │   │   ├── DifficultyScaling.lua
+│   │   │   ├── LootTable.lua
+│   │   │   ├── MetaProgression.lua
+│   │   │   ├── RoomGenerator.lua
+│   │   │   └── RunManager.lua
+│   │   ├── shop/
+│   │   │   ├── Currency.lua
+│   │   │   ├── ShopInventory.lua
+│   │   │   └── ShopManager.lua
+│   │   ├── story/
+│   │   │   ├── BranchingTree.lua
+│   │   │   ├── FlagSystem.lua
+│   │   │   ├── ScenarioLoader.lua
+│   │   │   └── StoryManager.lua
+│   │   └── upgrade/
+│   │       ├── AbilityUnlock.lua
+│   │       ├── StatUpgrade.lua
+│   │       └── UpgradeTree.lua
+│   ├── ui/
+│   │   ├── animations/
+│   │   │   ├── NumberPopup.lua
+│   │   │   └── UITransition.lua
+│   │   ├── components/
+│   │   │   ├── Button.lua
+│   │   │   ├── Checkbox.lua
+│   │   │   ├── Modal.lua
+│   │   │   ├── Notification.lua
+│   │   │   ├── Panel.lua
+│   │   │   ├── ProgressBar.lua
+│   │   │   ├── Slider.lua
+│   │   │   └── Tooltip.lua
+│   │   └── hud/
+│   │       ├── BattleHUD.lua
+│   │       ├── MinimapHUD.lua
+│   │       └── QuestTracker.lua
+│   └── utils/
+│       ├── animation/
+│       │   ├── Animator.lua
+│       │   ├── StateMachine.lua
+│       │   └── Tween.lua
+│       ├── debug/
+│       │   ├── Console.lua
+│       │   ├── DebugDraw.lua
+│       │   └── Profiler.lua
+│       ├── helpers/
+│       │   ├── Color.lua
+│       │   ├── Pool.lua
+│       │   ├── String.lua
+│       │   ├── Table.lua
+│       │   └── Timer.lua
+│       └── math/
+│           ├── Collision.lua
+│           ├── Easing.lua
+│           └── Vector2.lua
+├── tools/
+│   ├── build_scripts/
+│   │   ├── build_linux.sh
+│   │   ├── build_mac.sh
+│   │   └── build_win.bat
+│   ├── dialogue_editor/
+│   └── map_editor/
+├── conf.lua
+├── main.lua
+├── README.md
+└── README_V1.md
+```
+<!-- END_TREE -->
+
+Các ghi chú khác của dự án bạn có thể viết tiếp ở dưới này...

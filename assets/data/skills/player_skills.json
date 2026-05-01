@@ -1,0 +1,328 @@
+{
+  "_comment": "player_skills.json — Định nghĩa kỹ năng Player theo data-driven approach",
+  "_version": "1.0.0",
+  "_note": [
+    "Tất cả angle tính bằng radian. Dùng math.pi trong Lua khi load.",
+    "Tất cả thời gian tính bằng giây (seconds).",
+    "color là [r, g, b] trong khoảng [0..1].",
+    "easing phải khớp với key trong Easing.registry (Easing.lua).",
+    "condition_type: 'power_level' | 'buff' | 'boss_phase' | 'always'",
+    "hitbox_shape: 'arc' (định hướng theo chuột) | 'circle' (xung quanh player)"
+  ],
+
+  "melee": {
+    "_comment": "Đánh thường — click chuột trái. Kích hoạt luôn (không cần điều kiện).",
+
+    "base": {
+      "id":          "melee_base",
+      "displayName": "Slash",
+      "input":       "mouse_left",
+      "condition":   { "type": "always" },
+
+      "damage":      { "base": 35, "focusBonus": 15 },
+      "_damage_note": "focusBonus cộng thêm khi player đang Focus (Shift). Total = base + focusBonus.",
+
+      "cooldown":    0.35,
+      "_cooldown_note": "Giây giữa 2 lần đánh. Giảm dần theo power level (xem power_scaling).",
+
+      "hitbox": {
+        "shape":       "arc",
+        "range":       64,
+        "_range_note": "Pixel. Tính từ tâm player đến rìa hitbox.",
+        "arcDegrees":  130,
+        "_arc_note":   "Tổng góc cung (độ). Sẽ convert sang radian trong Lua: degrees * pi/180.",
+        "arcHalfRad":  1.1344,
+        "_arcHalfRad": "arcDegrees/2 * pi/180 = 65 * 0.01745 ≈ 1.1344 rad. Pre-computed để tránh tính lại.",
+        "direction":   "mouse_angle",
+        "_direction":  "Hướng arc theo góc từ player đến con trỏ chuột."
+      },
+
+      "swing_animation": {
+        "duration":    0.18,
+        "_duration":   "Giây. Animation swing arc hiển thị.",
+        "startAngle":  -0.9,
+        "endAngle":     0.9,
+        "_angle_note": "Radian offset từ attack_angle. Swing từ -0.9 đến +0.9 relative to mouse direction.",
+        "easing":      "quadOut",
+        "arcColor":    [0.4, 0.9, 1.0],
+        "arcAlpha":    0.55,
+        "lineWidth":   2.5,
+        "trailFade":   true
+      },
+
+      "impact_effect": {
+        "flashColor":   [1.0, 1.0, 1.0],
+        "flashAlpha":   0.7,
+        "flashDuration":0.08,
+        "hitStopFrames":2,
+        "_hitStop":     "Freeze cả player lẫn target N frames để tạo cảm giác impact."
+      },
+
+      "focus_modifier": {
+        "_comment":     "Áp dụng khi player đang giữ Shift (Focus mode).",
+        "rangeMult":    0.75,
+        "_range":       "Range giảm 25% nhưng damage tăng (focusBonus). Đổi lấy độ chính xác.",
+        "arcDegrees":   80,
+        "arcHalfRad":   0.6981,
+        "cooldownMult": 0.8,
+        "swingDuration":0.14,
+        "arcColor":     [1.0, 0.85, 0.2],
+        "arcAlpha":     0.7
+      }
+    },
+
+    "power_scaling": {
+      "_comment": "Mỗi power level thay đổi stats melee. Power level tăng khi nhặt power-up.",
+      "_note":    "Giá trị là multiplier nhân vào base stats, KHÔNG phải giá trị tuyệt đối.",
+
+      "1": {
+        "damageMult":   1.0,
+        "cooldown":     0.38,
+        "rangeMult":    1.0,
+        "comboEnabled": false
+      },
+      "2": {
+        "damageMult":   1.25,
+        "cooldown":     0.32,
+        "rangeMult":    1.1,
+        "comboEnabled": false
+      },
+      "3": {
+        "damageMult":   1.55,
+        "cooldown":     0.27,
+        "rangeMult":    1.2,
+        "comboEnabled": true,
+        "combo": {
+          "_comment":   "Combo 2-hit: click lần 2 trong cửa sổ combo_window để đánh tiếp.",
+          "maxHits":    2,
+          "comboWindow":0.45,
+          "_window":    "Giây sau hit đầu. Nếu click trong cửa sổ này → kích hoạt hit 2.",
+          "hit2": {
+            "damageMult":  0.8,
+            "_damage":     "Hit 2 nhẹ hơn hit 1 (80%) nhưng arc rộng hơn.",
+            "arcDegrees":  160,
+            "arcHalfRad":  1.3963,
+            "swingDir":   "opposite",
+            "_swingDir":   "Swing ngược chiều hit 1 để tạo cảm giác cross-slash."
+          }
+        }
+      },
+      "4": {
+        "damageMult":   2.0,
+        "cooldown":     0.22,
+        "rangeMult":    1.35,
+        "comboEnabled": true,
+        "combo": {
+          "maxHits":    3,
+          "comboWindow":0.5,
+          "hit2": {
+            "damageMult":  0.85,
+            "arcDegrees":  150,
+            "arcHalfRad":  1.3090,
+            "swingDir":   "opposite"
+          },
+          "hit3": {
+            "damageMult":  1.3,
+            "_damage":     "Finisher: mạnh nhất, arc full circle.",
+            "arcDegrees":  360,
+            "arcHalfRad":  3.1416,
+            "hitbox_shape":"circle",
+            "rangeMult":   1.2,
+            "swingDuration":0.25,
+            "easing":      "sineOut",
+            "arcColor":    [0.8, 0.4, 1.0],
+            "arcAlpha":    0.8,
+            "screenShake": { "intensity": 3, "duration": 0.15 }
+          }
+        }
+      }
+    }
+  },
+
+  "ranged": {
+    "_comment": "Tấn công từ xa — chỉ khả dụng khi đủ điều kiện (không phải mặc định).",
+
+    "slash_wave": {
+      "id":          "ranged_slash_wave",
+      "displayName": "Slash Wave",
+      "input":       "mouse_left",
+      "_input_note": "Cùng input melee. Hệ thống tự chọn ranged nếu điều kiện thỏa.",
+
+      "condition": {
+        "type":       "power_level",
+        "minLevel":   3,
+        "_note":      "Chỉ khả dụng khi power level ≥ 3 VÀ không có target trong melee range.",
+        "fallback":   "melee_base",
+        "_fallback":  "Nếu điều kiện không thỏa → dùng melee thường."
+      },
+
+      "priority":    10,
+      "_priority":   "Số cao hơn = ưu tiên hơn khi nhiều điều kiện cùng thỏa. Melee base = 0.",
+
+      "projectile": {
+        "shape":       "wave",
+        "width":       48,
+        "height":      14,
+        "speed":       520,
+        "lifetime":    0.55,
+        "_lifetime":   "Giây. Projectile tự hủy sau thời gian này.",
+        "damage":      22,
+        "pierce":      true,
+        "_pierce":     "Xuyên qua tất cả enemy/boss, không dừng lại.",
+        "color":       [0.4, 0.9, 1.0],
+        "trailColor":  [0.2, 0.5, 0.8],
+        "glowRadius":  8
+      },
+
+      "fire": {
+        "cooldown":    0.55,
+        "count":       1,
+        "spread":      0,
+        "originOffset":{ "x": 0, "y": 0 },
+        "_origin":     "Offset từ tâm player khi spawn projectile.",
+        "direction":   "mouse_angle",
+        "easing":      "linear"
+      },
+
+      "animation": {
+        "chargeTime":  0.0,
+        "_charge":     "0 = bắn ngay. >0 = cần giữ chuột để charge trước khi bắn.",
+        "castColor":   [0.4, 0.9, 1.0],
+        "castAlpha":   0.5
+      }
+    },
+
+    "charged_beam": {
+      "id":          "ranged_charged_beam",
+      "displayName": "Charge Beam",
+      "input":       "mouse_left_hold",
+      "_input_note": "Giữ chuột trái để charge, thả để bắn.",
+
+      "condition": {
+        "type":       "power_level",
+        "minLevel":   4,
+        "fallback":   "slash_wave",
+        "extraCond":  "focus_mode",
+        "_extra":     "Phải đang Focus (Shift) VÀ power level = 4 mới charge được."
+      },
+
+      "priority":    20,
+
+      "charge": {
+        "minTime":    0.4,
+        "_min":       "Giây giữ tối thiểu để bắn được.",
+        "maxTime":    1.2,
+        "_max":       "Giây tối đa. Sau maxTime tự động bắn.",
+        "chargeColor":    [1.0, 0.85, 0.2],
+        "chargeColorFull":[1.0, 0.4,  0.0],
+        "chargeEasing":   "sineInOut",
+        "chargeGlowMax":  32,
+        "_glow":      "Bán kính glow aura tối đa khi full charge."
+      },
+
+      "projectile": {
+        "shape":       "beam",
+        "width":       12,
+        "length":      500,
+        "_length":     "Tổng chiều dài beam (pixel). Render như rectangle hẹp dài.",
+        "speed":       0,
+        "_speed":      "0 = beam tức thì (raycast), không phải projectile di chuyển.",
+        "lifetime":    0.18,
+        "damage":      80,
+        "_damage":     "Full charge. Partial charge = damage * (chargeRatio^0.7).",
+        "pierce":      true,
+        "color":       [1.0, 0.9, 0.3],
+        "coreColor":   [1.0, 1.0, 1.0],
+        "glowRadius":  20
+      },
+
+      "fire": {
+        "cooldown":    1.2,
+        "direction":   "mouse_angle"
+      },
+
+      "animation": {
+        "beamFlashDuration": 0.12,
+        "screenShake":       { "intensity": 5, "duration": 0.2 },
+        "easing":            "quadOut"
+      }
+    }
+  },
+
+  "bomb": {
+    "_comment": "Bomb / Screen Clear — giữ nguyên từ thiết kế cũ, bổ sung config.",
+
+    "base": {
+      "id":            "bomb_base",
+      "displayName":   "Bomb",
+      "input":         "key_x",
+      "maxStock":      3,
+      "duration":      2.0,
+      "damagePerSec":  200,
+      "iframes":       2.2,
+      "_iframes":      "Player bất tử trong N giây khi bomb active.",
+
+      "visual": {
+        "flashColor":       [1.0, 1.0, 1.0],
+        "flashAlphaMax":    0.35,
+        "ringColor":        [0.6, 0.9, 1.0],
+        "ringLineWidth":    3,
+        "expandEasing":     "linear",
+        "waveInterval":     0.15,
+        "_wave":            "Spawn 1 shockwave ring mỗi N giây."
+      }
+    }
+  },
+
+  "trail": {
+    "_comment": "After-image trail khi di chuyển.",
+
+    "base": {
+      "sampleInterval": 0.04,
+      "maxSamples":     8,
+      "alphaStart":     0.5,
+      "fadeMult":       2.5,
+      "_fade":          "alpha -= fadeMult * dt mỗi frame.",
+      "color":          [0.0, 0.4, 0.9],
+      "alphaFactor":    0.6,
+      "easing":         "sineOut",
+      "_easing_note":   "Dùng Easing.get(trail.base.easing) để lấy hàm fade."
+    }
+  },
+
+  "focus": {
+    "_comment": "Focus mode khi giữ Shift. Không phải kỹ năng riêng — ảnh hưởng melee + ranged.",
+
+    "speedMult":       0.55,
+    "_speed":          "Player di chuyển chậm hơn 45% khi Focus.",
+    "hitboxScaleMult": 1.0,
+    "_hitbox":         "Hitbox player không thay đổi (Touhou style — hitbox luôn nhỏ).",
+    "showHitboxDot":   true,
+    "_dot":            "Hiển thị chấm trắng nhỏ ở tâm hitbox khi Focus.",
+    "dotColor":        [1.0, 1.0, 1.0],
+    "dotRadius":       2.5,
+    "dotPulse":        true,
+    "dotPulseEasing":  "sineInOut",
+    "dotPulseSpeed":   3.0
+  },
+
+  "graze": {
+    "_comment": "Graze: đạn bay sát mà không trúng → điểm + hiệu ứng.",
+
+    "radius":          28,
+    "_radius":         "Pixel. Lớn hơn hitboxRadius của player. Đạn trong vùng này = graze.",
+    "pointsPerGraze":  10,
+    "cooldownPerBullet":0.25,
+    "_cd":             "Mỗi viên đạn chỉ tính 1 graze mỗi N giây.",
+
+    "visual": {
+      "ringColor":     [0.4, 0.8, 1.0],
+      "ringAlphaMax":  0.6,
+      "ringExpandMult":1.6,
+      "_expand":       "Ring mở rộng đến radius * expandMult rồi fade.",
+      "expandDuration":0.5,
+      "expandEasing":  "quadOut",
+      "fadeEasing":    "sineOut"
+    }
+  }
+}

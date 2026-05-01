@@ -38,18 +38,23 @@ end
 
 function Boss:update(dt)
     if self.isDead then return end
-
-    -- Ủy quyền cho Phase Manager kiểm tra máu và tự động gọi Hook đổi Phase nếu cần
+    
+    -- [[ DEBUG: Removed frame-by-frame log to prevent lag
+    -- print(string.format("[Boss] update dt=%.3f state=%s phase=%d hp=%d",
+    --    dt, self.state, self.phaseManager:getCurrentPhase(), self.hp))
+    -- ]]
+    
     self.phaseManager:update()
-
-    -- Nếu đang diễn cảnh chuyển phase thì boss không bắn đạn
     if self.state == "transitioning" then return end
-
-    -- Đếm ngược để gọi đòn tấn công
+    
     self.attackTimer = self.attackTimer + dt
+    -- print("[Boss] attackTimer=" .. self.attackTimer .. " cooldown=" .. self.attackCooldown)
+    
     if self.attackTimer >= self.attackCooldown then
         self.attackTimer = 0
-        self:castAttack() -- Hàm ảo sẽ do lớp con quyết định
+        -- print("[Boss] castAttack() bắt đầu...")
+        self:castAttack()
+        -- print("[Boss] castAttack() kết thúc")
     end
 end
 

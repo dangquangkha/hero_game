@@ -26,7 +26,7 @@ function Bullet:initialize(x, y, angle, speed, properties)
     properties = properties or {}
     
     -- [BƯỚC 2] Khởi tạo các thuộc tính chiến đấu
-    self.damage = properties.damage or 10 -- Sát thương gây ra cho người chơi
+    self.damage = properties.damage or 1 -- Sát thương gây ra cho người chơi (giảm từ 10 xuống 1 để phù hợp với 5 HP của player)
     
     -- [BƯỚC 3] Khởi tạo thuộc tính hiển thị (Visuals)
     self.radius = properties.radius or 5           -- Kích thước viên đạn

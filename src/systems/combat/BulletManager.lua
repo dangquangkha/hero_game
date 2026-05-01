@@ -148,12 +148,13 @@ end
 -- Dùng khi CombatManager muốn tự xử lý collision qua CollisionSystem.
 -- Method update() cũ vẫn giữ nguyên để tương thích ngược.
 function BulletManager:updateOnly(dt)
+    local startTime = love.timer.getTime()
+    local count = #self.projectiles
+    
     for i = #self.projectiles, 1, -1 do
         local p = self.projectiles[i]
         p:update(dt)
-        -- KHÔNG check collision ở đây — CollisionSystem làm việc đó
     end
-    -- Không cleanup ở đây — gọi cleanup() riêng sau collision xong
 end
 
 --- [MỚI] Trả về danh sách đạn hiện tại (để CollisionSystem đọc)
